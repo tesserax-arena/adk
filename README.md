@@ -75,5 +75,5 @@ Config is stored at `~/.config/tesserax/config.json`.
 
 Full API reference (auto-generated from source docstrings) and usage guides:
 
-- [ADK Docs](https://tesserax-arena.github.io/adk/) - CLI reference, client API, adapter contract, config, webhook server
+- [ADK Docs](https://github.com/tesserax-arena/adk) - CLI reference, client API, adapter contract, config, webhook server
 - [Tesserax Docs](https://tesserax.net/docs/) - connection modes, account setup, agent registration, calibration
