@@ -1,132 +1,198 @@
-/*  Tesserax ADK docs: dark-only theme  */
+/*  Tesserax ADK docs: matches tesserax.net/docs/ void theme  */
 
 :root {
-  --vp-c-bg: #0d0d0d;
-  --vp-c-bg-alt: #111;
-  --vp-c-bg-elv: #161616;
-  --vp-c-bg-soft: #1a1a1a;
+  --vp-c-bg: #000000;
+  --vp-c-bg-alt: #050505;
+  --vp-c-bg-elv: #080808;
+  --vp-c-bg-soft: #0a0a0a;
+  --vp-c-text: rgba(255, 255, 255, 0.92);
+  --vp-c-text-1: rgba(255, 255, 255, 0.92);
+  --vp-c-text-2: rgba(255, 255, 255, 0.72);
+  --vp-c-text-3: rgba(255, 255, 255, 0.55);
+  --vp-c-text-muted: rgba(255, 255, 255, 0.68);
+  --vp-c-border: rgba(255, 255, 255, 0.12);
+  --vp-c-divider: rgba(255, 255, 255, 0.06);
+  --vp-c-gutter: rgba(255, 255, 255, 0.05);
+  --vp-c-brand: #ffffff;
+  --vp-c-brand-light: rgba(255, 255, 255, 0.85);
+  --vp-c-brand-lighter: rgba(255, 255, 255, 0.7);
+  --vp-c-brand-dark: #e0e0e0;
+  --vp-c-brand-darker: #c0c0c0;
+  --vp-c-brand-soft: rgba(255, 255, 255, 0.15);
+  --vp-c-brand-2: #ffffff;
+  --vp-c-brand-3: rgba(255, 255, 255, 0.1);
+  --vp-c-default-1: rgba(255, 255, 255, 0.12);
+  --vp-c-default-2: rgba(255, 255, 255, 0.08);
+  --vp-c-default-3: rgba(255, 255, 255, 0.05);
+  --vp-c-default-soft: rgba(255, 255, 255, 0.04);
+  --vp-c-gray-1: #333;
+  --vp-c-gray-2: #222;
+  --vp-c-gray-3: #111;
+  --vp-c-gray-soft: rgba(255, 255, 255, 0.04);
+  --vp-c-indigo-1: #ccc;
+  --vp-c-indigo-2: #999;
+  --vp-c-indigo-3: #555;
+  --vp-c-indigo-soft: rgba(255, 255, 255, 0.08);
+  --vp-c-mute: rgba(255, 255, 255, 0.04);
+  --vp-c-mute-hover: rgba(255, 255, 255, 0.08);
 
-  --vp-c-text: #e4e4e7;
-  --vp-c-text-1: #e4e4e7;
-  --vp-c-text-2: #a1a1aa;
-  --vp-c-text-3: #71717a;
+  --vp-font-family-base: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --vp-font-family-mono: "JetBrains Mono", monospace;
 
-  --vp-c-border: #27272a;
-  --vp-c-divider: #27272a;
+  --vp-code-color: rgba(255, 255, 255, 0.92);
+  --vp-code-bg: rgba(255, 255, 255, 0.04);
+  --vp-code-copy-code-bg: rgba(255, 255, 255, 0.06);
+  --vp-code-copy-code-hover-bg: rgba(255, 255, 255, 0.1);
+  --vp-code-block-bg: #050505;
+  --vp-code-tab-divider: rgba(255, 255, 255, 0.08);
+  --vp-code-line-highlight-color: rgba(255, 255, 255, 0.04);
 
-  --vp-c-brand: #818cf8;
-  --vp-c-brand-light: #a5b4fc;
-  --vp-c-brand-dark: #6366f1;
-  --vp-c-brand-darker: #4f46e5;
+  --vp-custom-block-font-size: 0.9rem;
+  --vp-custom-block-code-font-size: 0.85rem;
 
-  --vp-c-green: #22c55e;
-  --vp-c-yellow: #eab308;
-  --vp-c-red: #ef4444;
-
-  --vp-code-color: #f472b6;
-  --vp-code-bg: #18181b;
-  --vp-code-block-bg: #0a0a0a;
-  --vp-code-line-number-color: #52525b;
-
-  --vp-custom-block-info-bg: #1c1c2e;
-  --vp-custom-block-tip-bg: #0f1f0f;
-  --vp-custom-block-warning-bg: #1f1a0a;
-  --vp-custom-block-danger-bg: #1f0a0a;
-
-  --vp-font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  --vp-font-family-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+  --vp-home-hero-name-color: #ffffff;
+  --vp-home-hero-name-background: transparent;
+  --vp-home-hero-image-background-image: none;
+  --vp-home-hero-image-filter: none;
 }
 
-/* Dark mode forced */
 html {
+  background-color: #000000;
   color-scheme: dark;
 }
 
 body {
-  background: var(--vp-c-bg);
-  color: var(--vp-c-text);
+  background-color: #000000;
 }
 
-/* Links */
+.VPPage {
+  background-color: #000000;
+}
+
+.VPSidebar {
+  background-color: #050505 !important;
+  border-right: 0.5px solid rgba(255, 255, 255, 0.06) !important;
+}
+
+.VPSidebarItem .text {
+  color: var(--vp-c-text-2);
+}
+
+.VPSidebarItem.is-active .text {
+  color: #ffffff;
+}
+
+.VPNavBar {
+  background-color: #000000 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.VPNavBar .logo {
+  filter: none;
+}
+
+.VPContent {
+  background-color: #000000;
+}
+
 a {
-  color: var(--vp-c-brand);
-}
-a:hover {
-  color: var(--vp-c-brand-light);
+  color: rgba(255, 255, 255, 0.82);
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-color: rgba(255, 255, 255, 0.2);
+  transition: text-decoration-color 0.15s;
 }
 
-/* Code blocks */
+a:hover {
+  color: #ffffff;
+  text-decoration-color: rgba(255, 255, 255, 0.6);
+}
+
 .vp-doc div[class*='language-'] {
-  background: var(--vp-code-block-bg);
-  border: 1px solid var(--vp-c-border);
-  border-radius: 8px;
+  background: #050505;
+  border: 0.5px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0;
 }
 
 .vp-doc code {
-  color: var(--vp-code-color);
-  background: var(--vp-code-bg);
-  padding: 0.15em 0.35em;
-  border-radius: 4px;
-  font-family: var(--vp-font-family-mono);
+  color: rgba(255, 255, 255, 0.92);
 }
 
-.vp-doc pre code {
-  color: #e4e4e7;
+.vp-doc div[class*='language-'] .copy {
+  opacity: 0.5;
 }
 
-/* Headings */
-.vp-doc h1, .vp-doc h2, .vp-doc h3, .vp-doc h4 {
-  color: #f4f4f5;
-  border-bottom-color: var(--vp-c-border);
+.vp-doc div[class*='language-'] .copy:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.08);
 }
 
-/* Sidebar */
-.VPSidebar {
-  background: var(--vp-c-bg-alt);
-  border-right: 1px solid var(--vp-c-border);
+.vp-doc h1 {
+  color: #ffffff;
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
-/* Nav bar */
-.VPNav {
-  background: rgba(13, 13, 13, 0.85);
-  backdrop-filter: blur(8px);
-  border-bottom: 1px solid var(--vp-c-border);
+.vp-doc h2 {
+  color: #ffffff;
+  font-weight: 600;
+  border-top: 0.5px solid rgba(255, 255, 255, 0.06);
+  padding-top: 1.5rem;
+  margin-top: 2.5rem;
 }
 
-/* Search */
+.vp-doc h3 {
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 600;
+}
+
+.custom-block {
+  border-radius: 0;
+  background-color: rgba(255, 255, 255, 0.02) !important;
+}
+
+.VPFooter {
+  border-top: 0.5px solid rgba(255, 255, 255, 0.06);
+  background-color: #000000 !important;
+}
+
+.VPFooter .copyright {
+  color: var(--vp-c-text-3);
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
 .DocSearch-Button {
-  background: var(--vp-c-bg-soft);
-  border: 1px solid var(--vp-c-border);
+  background: rgba(255, 255, 255, 0.04) !important;
+  border: 0.5px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 0 !important;
 }
 
-/* Tables */
+.DocSearch-Button:hover {
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
 .vp-doc table {
   border-collapse: collapse;
-  width: 100%;
 }
+
+.vp-doc th, .vp-doc td {
+  border: 0.5px solid rgba(255, 255, 255, 0.1);
+}
+
 .vp-doc th {
-  background: var(--vp-c-bg-soft);
-  color: var(--vp-c-text-1);
-  border: 1px solid var(--vp-c-border);
-  padding: 8px 12px;
-}
-.vp-doc td {
-  border: 1px solid var(--vp-c-border);
-  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.03);
+  color: #ffffff;
 }
 
-/* Custom block styling */
-.vp-doc .custom-block {
-  border-radius: 6px;
-  border-left: 4px solid var(--vp-c-brand);
+.vp-doc blockquote {
+  border-left: 2px solid rgba(255, 255, 255, 0.2);
+  color: var(--vp-c-text-2);
 }
 
-/* Inline code in headings */
-.vp-doc h2 code, .vp-doc h3 code {
-  font-size: inherit;
-}
-
-/* Footer */
-.VPFooter {
-  border-top: 1px solid var(--vp-c-border);
+.vp-doc hr {
+  border-top: 0.5px solid rgba(255, 255, 255, 0.06);
 }
