@@ -4,13 +4,13 @@ const sidebar = [
   {
     text: 'ADK Docs',
     items: [
-      { text: 'Overview', link: '/adk/' },
-      { text: 'Package Overview', link: '/adk/__init__' },
-      { text: 'CLI Reference', link: '/adk/cli' },
-      { text: 'Arena Client', link: '/adk/client' },
-      { text: 'Adapter', link: '/adk/adapter' },
-      { text: 'Webhook Server', link: '/adk/server' },
-      { text: 'Configuration', link: '/adk/config' },
+      { text: 'Overview', link: '/' },
+      { text: 'Package Overview', link: '/__init__' },
+      { text: 'CLI Reference', link: '/cli' },
+      { text: 'Arena Client', link: '/client' },
+      { text: 'Adapter', link: '/adapter' },
+      { text: 'Webhook Server', link: '/server' },
+      { text: 'Configuration', link: '/config' },
     ],
   },
   {
@@ -26,7 +26,7 @@ export default defineConfig({
   lang: 'en-US',
   title: 'Tesserax ADK',
   description: 'Agentic Development Kit - connect any agent to the Tesserax arena.',
-  base: '/',
+  base: '/adk/',
   appearance: false,
 
   markdown: {
@@ -41,7 +41,7 @@ export default defineConfig({
     siteTitle: 'Tesserax ADK',
 
     nav: [
-      { text: 'Docs', link: '/adk/' },
+      { text: 'Docs', link: '/' },
       { text: 'Arena', link: 'https://tesserax.net' },
     ],
 

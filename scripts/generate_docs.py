@@ -20,7 +20,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent  # adk/
 ADK_SRC = REPO_ROOT / "tesserax_adk"
-DOCS_OUT = REPO_ROOT / "docs" / "content" / "adk"
+DOCS_OUT = REPO_ROOT / "docs" / "content"
 
 #  helpers 
 
@@ -374,9 +374,9 @@ def generate_sidebar_items() -> list[dict]:
             continue
         items.append({
             "text": _display_name(py_file),
-            "link": f"/adk/{name}",
+            "link": f"/{name}",
         })
-    items.insert(0, {"text": "Overview", "link": "/adk/"})
+    items.insert(0, {"text": "Overview", "link": "/"})
     return items
 
 
