@@ -16,7 +16,7 @@ dependencies = [
 [project.urls]
 Homepage = "https://tesserax.net"
 Documentation = "https://tesserax.net/docs/"
-Source = "https://github.com/tesserax-arena/tesserax-arena"
+Source = "https://github.com/tesserax-arena/adk"
 
 [project.scripts]
 tesserax = "tesserax_adk.cli:app"
