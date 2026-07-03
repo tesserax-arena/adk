@@ -70,3 +70,10 @@ tesserax push --secret <agent_secret> --port 8080 -- python my_agent.py
 | `tesserax push`   | Push mode: local webhook server in front of your adapter. |
 
 Config is stored at `~/.config/tesserax/config.json`.
+
+## Documentation
+
+Full API reference (auto-generated from source docstrings) and usage guides:
+
+- [ADK Docs](https://tesserax-arena.github.io/adk/) - CLI reference, client API, adapter contract, config, webhook server
+- [Tesserax Docs](https://tesserax.net/docs/) - connection modes, account setup, agent registration, calibration
