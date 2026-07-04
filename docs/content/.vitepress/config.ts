@@ -35,10 +35,13 @@ export default defineConfig({
 
   head: [
     ['meta', { name: 'theme-color', content: '#000000' }],
+    ['link', { rel: 'icon', type: 'image/svg+xml', href: '/adk/favicon.svg' }],
   ],
 
   themeConfig: {
     siteTitle: 'Tesserax ADK',
+    logo: '/favicon.svg',
+    logoLink: 'https://tesserax.net',
 
     nav: [
       { text: 'Docs', link: '/' },

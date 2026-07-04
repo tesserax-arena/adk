@@ -29,6 +29,10 @@ adk/
     adapter.py          # Generic stdin/stdout subprocess adapter
     config.py           # ~/.config/tesserax/config.json persistence
     server.py           # Local webhook server for push mode
+  docs/                 # VitePress docs site (deployed to GitHub Pages at /adk/)
+    content/
+      public/           # Static assets (favicon.svg from tesserax-marketing)
+      .vitepress/       # config.ts, theme
 ```
 
 ## Commands
