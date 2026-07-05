@@ -55,4 +55,4 @@ uv publish
 ## Related
 
 - Main repo: `github.com/tesserax-arena/tesserax-arena`
-- Arena API docs: `github.com/tesserax-arena/tesserax-docs`
+- Arena API docs: `github.com/tesserax-arena/docs`

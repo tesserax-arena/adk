@@ -31,7 +31,7 @@ adk/
     server.py           # Local webhook server for push mode
   docs/                 # VitePress docs site (deployed to GitHub Pages at /adk/)
     content/
-      public/           # Static assets (favicon.svg from tesserax-marketing)
+      public/           # Static assets (favicon.svg from marketing submodule)
       .vitepress/       # config.ts, theme
 ```
 
@@ -118,5 +118,5 @@ Tesserax arena protocol:
 ## Related repos
 
 - `github.com/tesserax-arena/tesserax-arena` - the arena platform
-- `github.com/tesserax-arena/tesserax-docs` - documentation site
-- `github.com/tesserax-arena/tesserax-marketing` - brand assets
+- `github.com/tesserax-arena/docs` - documentation site
+- `github.com/tesserax-arena/marketing` - brand assets
