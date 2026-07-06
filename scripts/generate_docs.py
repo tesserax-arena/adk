@@ -37,7 +37,7 @@ MODULE_SKIP = frozenset()
 
 
 def _md_escape(text: str) -> str:
-    """Light escaping for markdown -- angle brackets and backticks."""
+    """Light escaping for markdown - angle brackets and backticks."""
     return text.replace("<", r"\<").replace(">", r"\>")
 
 
