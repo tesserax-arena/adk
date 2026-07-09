@@ -83,12 +83,45 @@ class ArenaClient:
         return _json_or_raise(resp)
 
 
+def _looks_like_cloudflare_challenge(resp: httpx.Response) -> bool:
+    """True when the edge returned a bot challenge HTML page instead of the API."""
+    if resp.headers.get("cf-mitigated", "").lower() == "challenge":
+        return True
+    ctype = (resp.headers.get("content-type") or "").lower()
+    if "text/html" not in ctype:
+        return False
+    body = resp.text[:2000].lower()
+    return "just a moment" in body or "cf-browser-verification" in body or "challenge-platform" in body
+
+
 def _json_or_raise(resp: httpx.Response) -> dict:
+    if _looks_like_cloudflare_challenge(resp):
+        raise ArenaError(
+            f"HTTP {resp.status_code}: Cloudflare bot challenge blocked this request "
+            f"to {resp.request.url}. Non-browser clients cannot complete the challenge. "
+            "Workaround: pass --base-url https://tesserax-arena.fly.dev "
+            "(or another unchallenged origin). Operator fix: disable Bot Fight Mode "
+            "for API traffic, or put api.tesserax.net on DNS-only (grey cloud)."
+        )
     if resp.status_code >= 400:
         detail = resp.text
         try:
             detail = resp.json().get("detail", detail)
         except Exception:
             pass
+        # Truncate huge HTML error bodies
+        if isinstance(detail, str) and len(detail) > 400:
+            detail = detail[:400] + "..."
         raise ArenaError(f"HTTP {resp.status_code}: {detail}")
-    return resp.json()
+    # 204 has no body - callers handle it before this helper for next_work
+    if resp.status_code == 204 or not resp.content:
+        return {}
+    try:
+        return resp.json()
+    except Exception as exc:
+        if _looks_like_cloudflare_challenge(resp):
+            raise ArenaError(
+                "Cloudflare bot challenge returned non-JSON body. "
+                "Use --base-url https://tesserax-arena.fly.dev or fix edge config."
+            ) from exc
+        raise ArenaError(f"expected JSON, got {resp.headers.get('content-type')}: {resp.text[:200]!r}") from exc

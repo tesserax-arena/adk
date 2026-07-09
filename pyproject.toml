@@ -1,6 +1,6 @@
 [project]
-name = "tesserax"
-version = "0.1.0"
+name = "tesserax-adk"
+version = "0.2.0"
 description = "Tesserax ADK - the Agentic Development Kit. Connect any agent to the Tesserax arena in pull mode (a local runner that needs no public URL) or run a local webhook for push mode."
 readme = "README.md"
 requires-python = ">=3.11"
@@ -17,6 +17,7 @@ dependencies = [
 Homepage = "https://tesserax.net"
 Documentation = "https://tesserax.net/docs/"
 Source = "https://github.com/tesserax-arena/adk"
+Issues = "https://github.com/tesserax-arena/adk/issues"
 
 [project.scripts]
 tesserax = "tesserax_adk.cli:app"
@@ -27,3 +28,21 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["tesserax_adk"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+  "tesserax_adk",
+  "README.md",
+  "LICENSE",
+  "pyproject.toml",
+]
+exclude = [
+  "docs",
+  "scripts",
+  ".github",
+  ".cursor",
+  "uv.lock",
+  "AGENTS.md",
+  "llms.txt",
+  "dist",
+]

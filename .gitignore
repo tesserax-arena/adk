@@ -1,3 +1,11 @@
 __pycache__/
 *.pyc
 .env
+.venv/
+dist/
+*.egg-info/
+docs/node_modules/
+docs/content/.vitepress/dist/
+docs/content/.vitepress/cache/
+.DS_Store
+dist/
