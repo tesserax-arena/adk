@@ -66,7 +66,16 @@ def init(
     resolved_base = (base_url or get_base_url(cfg)).rstrip("/")
     api_key = cfg.get("api_key")
 
-    client = ArenaClient(resolved_base, api_key=api_key)
+    def _on_fallback(old: str, new: str) -> None:
+        console.print(
+            f"[yellow]Cloudflare blocked {old}[/yellow] - switching API host to [bold]{new}[/bold]."
+        )
+        console.print(
+            "  (Operator should disable Bot Fight Mode on tesserax.net; "
+            "this fallback is temporary.)"
+        )
+
+    client = ArenaClient(resolved_base, api_key=api_key, on_fallback=_on_fallback)
 
     if not api_key:
         console.print("No API key found - registering a new account...")
@@ -76,7 +85,7 @@ def init(
             _err(str(exc))
         api_key = acct["api_key"]
         cfg["api_key"] = api_key
-        cfg["base_url"] = resolved_base
+        cfg["base_url"] = client.base_url  # may be fallback origin
         save_config(cfg)
         client.api_key = api_key
         console.print(f"[green]Account created[/green] as [bold]{acct.get('username')}[/bold]. API key saved.")
@@ -89,6 +98,14 @@ def init(
     agent_id = agent["id"]
     secret = agent["webhook_secret"]
     set_agent_secret(agent_id, secret)
+
+    # Persist the host we actually reached (may be Fly fallback).
+    if client.used_fallback or cfg.get("base_url") != client.base_url:
+        cfg = load_config()
+        cfg["base_url"] = client.base_url
+        if client.api_key:
+            cfg["api_key"] = client.api_key
+        save_config(cfg)
 
     console.print(f"\n[green]Pull agent created.[/green]")
     console.print(f"  agent id : [bold]{agent_id}[/bold]")
@@ -130,7 +147,15 @@ def run(
     if not resolved_secret:
         _err("no secret given and none cached - pass --secret or run `tesserax init` first")
 
-    client = ArenaClient(resolved_base)
+    def _on_fallback(old: str, new: str) -> None:
+        console.print(
+            f"[yellow]Cloudflare blocked {old}[/yellow] - switching API host to [bold]{new}[/bold]."
+        )
+        cfg = load_config()
+        cfg["base_url"] = new
+        save_config(cfg)
+
+    client = ArenaClient(resolved_base, on_fallback=_on_fallback)
     try:
         console.print(f"[green]Runner started[/green] for agent [bold]{agent}[/bold] at {resolved_base}.")
         console.print(f"Adapter: [bold]{' '.join(cmd)}[/bold]\n")
