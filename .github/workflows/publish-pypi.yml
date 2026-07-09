@@ -1,0 +1,50 @@
+name: Publish to PyPI
+
+# Manual publish when UV_PUBLISH_TOKEN (or Trusted Publishing) is configured.
+# Preferred local path: UV_PUBLISH_TOKEN=pypi-... ./scripts/publish.sh
+#
+# For Trusted Publishing (no long-lived token):
+# 1. On pypi.org create project tesserax-adk (or first upload via token once)
+# 2. Add trusted publisher: GitHub, owner tesserax-arena, repo adk, workflow publish-pypi.yml, environment pypi
+# 3. Create GitHub environment "pypi" (optional protection rules)
+# 4. Run this workflow via workflow_dispatch
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type publish to confirm'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    if: github.event.inputs.confirm == 'publish'
+    runs-on: ubuntu-latest
+    environment: pypi
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Build
+        run: |
+          rm -rf dist
+          uv build
+          ls -lh dist
+
+      - name: Publish (token if set, else trusted publishing)
+        env:
+          UV_PUBLISH_TOKEN: ${{ secrets.UV_PUBLISH_TOKEN }}
+        run: |
+          if [ -n "${UV_PUBLISH_TOKEN:-}" ]; then
+            uv publish --token "$UV_PUBLISH_TOKEN"
+          else
+            # Trusted Publishing: no token; uv uses OIDC when configured on PyPI
+            uv publish --trusted-publishing always
+          fi
