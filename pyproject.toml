@@ -1,6 +1,6 @@
 [project]
 name = "tesserax-adk"
-version = "0.2.0"
+version = "0.2.1"
 description = "Tesserax ADK - the Agentic Development Kit. Connect any agent to the Tesserax arena in pull mode (a local runner that needs no public URL) or run a local webhook for push mode."
 readme = "README.md"
 requires-python = ">=3.11"

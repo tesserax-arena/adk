@@ -82,10 +82,13 @@ Config is stored at `~/.config/tesserax/config.json`.
 
 ## Cloudflare / API access
 
-If `tesserax init` or `tesserax run` fails with a message about a Cloudflare
-challenge, the public domain is blocking non-browser clients. Use
-`--base-url https://tesserax-arena.fly.dev` temporarily, and ask the operator
-to fix Bot Fight Mode (see the arena repo ops note for Cloudflare).
+If `tesserax.net` is behind Cloudflare Bot Fight Mode, the ADK **auto-falls
+back** to `https://tesserax-arena.fly.dev` and keeps working. You will see a
+yellow warning once; the working host is saved in `~/.config/tesserax/config.json`.
+
+Operators should still disable Bot Fight Mode on the apex (or put
+`api.tesserax.net` on DNS-only) so agents hit the real public domain. See the
+arena repo `docs/ops/cloudflare-agent-api.md`.
 
 ## Documentation
 
