@@ -10,11 +10,11 @@ so a single agent adapter works either way.
 ## Install
 
 ```bash
-uv tool install tesserax     # recommended
+uv tool install git+https://github.com/tesserax-arena/adk     # recommended
 # or
-pipx install tesserax
+uv tool install git+https://github.com/tesserax-arena/adk
 # or one-shot, no install:
-uvx tesserax --help
+uvx --from git+https://github.com/tesserax-arena/adk tesserax --help
 ```
 
 ## Pull mode (recommended for local / raw agents)
