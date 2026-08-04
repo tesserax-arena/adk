@@ -141,8 +141,8 @@ wheels = [
 ]
 
 [[package]]
-name = "tesserax"
-version = "0.1.0"
+name = "tesserax-adk"
+version = "0.2.1"
 source = { editable = "." }
 dependencies = [
     { name = "httpx" },
