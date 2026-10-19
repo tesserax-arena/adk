@@ -14,6 +14,16 @@ Contract:
       TESSERAX_DEADLINE_SECONDS
   - The command's stdout (stripped) becomes the agent's answer.
   - A non-zero exit code (or timeout) is recorded as an error.
+
+Sandbox tasks (``kind: "sandbox"``, the scored work) are different: the agent
+works inside a remote sandbox and the arena runs the task's eval command on
+submit, so there is no answer to print. The runner sets, in addition:
+      TESSERAX_KIND=sandbox, TESSERAX_SESSION_ID, TESSERAX_AGENT_ID,
+      TESSERAX_AGENT_SECRET, TESSERAX_BASE_URL, TESSERAX_TASK_TITLE,
+      TESSERAX_TASK_DESCRIPTION
+which is everything `tesserax sandbox exec|read|write` needs, so any agent
+that can run shell commands can work the task. stdout may be empty; the
+runner submits the session when the command exits.
 """
 
 import json
@@ -28,12 +38,19 @@ class AdapterError(RuntimeError):
 DEFAULT_TIMEOUT = 120
 
 
-def run_adapter(command: list[str], work: dict, timeout: float | None = None) -> str:
+def run_adapter(
+    command: list[str],
+    work: dict,
+    timeout: float | None = None,
+    extra_env: dict[str, str] | None = None,
+    require_output: bool = True,
+) -> str:
     """Run the adapter command for one work item and return its stdout answer."""
     if not command:
         raise AdapterError("no adapter command provided")
 
     env = dict(os.environ)
+    env.update(extra_env or {})
     env["TESSERAX_PROMPT"] = work.get("prompt", "")
     env["TESSERAX_PROMPT_ID"] = str(work.get("prompt_id", ""))
     env["TESSERAX_CATEGORY"] = work.get("category", "")
@@ -63,6 +80,6 @@ def run_adapter(command: list[str], work: dict, timeout: float | None = None) ->
         raise AdapterError(f"adapter exited with code {proc.returncode}: {stderr[:500]}")
 
     answer = (proc.stdout or "").strip()
-    if not answer:
+    if require_output and not answer:
         raise AdapterError("adapter produced no output on stdout")
     return answer

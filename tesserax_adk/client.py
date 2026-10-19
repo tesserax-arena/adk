@@ -2,6 +2,11 @@
 
 from __future__ import annotations
 
+import hashlib
+import hmac
+import json
+import time
+
 import httpx
 
 
@@ -167,6 +172,61 @@ class ArenaClient:
             headers={"X-Arena-Secret": secret, "Content-Type": "application/json"},
         )
         return _json_or_raise(resp)
+
+    # -- sandbox sessions (agent-secret auth) ---------------------------------
+    #
+    # POSTs are signed over the exact body bytes. GETs carry both the secret
+    # header (Python tier) and a signature over the empty body (Go tier), so
+    # the same call works against either.
+
+    def _post_signed(self, path: str, secret: str, payload: dict) -> httpx.Response:
+        body = json.dumps(payload).encode("utf-8")
+        headers = {"X-Arena-Signature": sign(secret, body), "Content-Type": "application/json"}
+        return self._request("POST", path, content=body, headers=headers)
+
+    def _get_signed(self, path: str, secret: str) -> httpx.Response:
+        headers = {"X-Arena-Secret": secret, "X-Arena-Signature": sign(secret, b"")}
+        return self._request("GET", path, headers=headers)
+
+    def sandbox_exec(self, session_id: int, secret: str, command: str, timeout: int = 120) -> dict:
+        """Run a shell command in the session's sandbox: {exit_code, stdout, stderr}.
+
+        The arena allows one command per 2 seconds per session; a 429 is
+        waited out (Retry-After) rather than surfaced.
+        """
+        for _ in range(10):
+            resp = self._post_signed(
+                f"/api/sandbox/{session_id}/exec", secret, {"command": command, "timeout": timeout}
+            )
+            if resp.status_code != 429:
+                return _json_or_raise(resp)
+            time.sleep(float(resp.headers.get("Retry-After") or 2))
+        return _json_or_raise(resp)
+
+    def sandbox_read(self, session_id: int, secret: str, path: str) -> str:
+        resp = self._get_signed(f"/api/sandbox/{session_id}/files/{path.lstrip('/')}", secret)
+        if resp.status_code >= 400:
+            _json_or_raise(resp)
+        return resp.text
+
+    def sandbox_write(self, session_id: int, secret: str, path: str, content: str) -> dict:
+        rel = path.lstrip("/")
+        return _json_or_raise(
+            self._post_signed(f"/api/sandbox/{session_id}/files/{rel}", secret, {"path": rel, "content": content})
+        )
+
+    def sandbox_submit(self, session_id: int, secret: str) -> dict:
+        """Hand the session in. The arena then runs the task's fixed eval
+        command; the result is never something the agent reports."""
+        return _json_or_raise(self._post_signed(f"/api/sandbox/{session_id}/submit", secret, {}))
+
+    def sandbox_status(self, session_id: int, secret: str) -> dict:
+        return _json_or_raise(self._get_signed(f"/api/sandbox/{session_id}/status", secret))
+
+
+def sign(secret: str, body: bytes) -> str:
+    """X-Arena-Signature: hex HMAC-SHA256 of the raw request body."""
+    return hmac.new(secret.encode("utf-8"), body, hashlib.sha256).hexdigest()
 
 
 def _looks_like_cloudflare_challenge(resp: httpx.Response) -> bool:

@@ -5,8 +5,11 @@ Commands:
   tesserax init    - register an account (if needed) and create a pull-mode agent.
   tesserax run     - pull mode: poll for work, run your agent, submit answers.
   tesserax push    - push mode: run a local webhook server in front of your agent.
+  tesserax sandbox - exec / read / write inside a sandbox task (from your agent).
 """
 
+import os
+import sys
 import time
 from typing import List, Optional
 
@@ -183,6 +186,12 @@ def run(
                     return
                 continue
 
+            if work.get("kind") == "sandbox":
+                _run_sandbox(client, cmd, work, agent, resolved_secret)
+                if once:
+                    return
+                continue
+
             work_id = work["work_id"]
             kind = work.get("kind", "?")
             console.print(f"→ {kind} work [bold]{work_id}[/bold]: {work.get('prompt', '')[:80]!r}")
@@ -242,3 +251,101 @@ def push(
 
 if __name__ == "__main__":
     app()
+
+
+def _run_sandbox(client: ArenaClient, cmd: list[str], work: dict, agent: int, secret: str) -> None:
+    """One scored sandbox task: run the adapter with the session in its
+    environment, then submit. The arena runs the task's fixed eval command on
+    submit; nothing is posted to work/result (it answers 409 for sandbox work).
+    """
+    session_id = work["session_id"]
+    console.print(f"→ sandbox task [bold]{work.get('title', '')}[/bold] (session {session_id})")
+    env = {
+        "TESSERAX_KIND": "sandbox",
+        "TESSERAX_SESSION_ID": str(session_id),
+        "TESSERAX_AGENT_ID": str(agent),
+        "TESSERAX_AGENT_SECRET": secret,
+        "TESSERAX_BASE_URL": client.base_url,
+        "TESSERAX_TASK_TITLE": work.get("title", ""),
+        "TESSERAX_TASK_DESCRIPTION": work.get("description", ""),
+    }
+    try:
+        run_adapter(cmd, work, timeout=work.get("deadline_seconds"), extra_env=env, require_output=False)
+    except AdapterError as exc:
+        # Submit anyway: the attempt is scored on what is in the sandbox. An
+        # unsubmitted session is abandoned and unscored, so skipping the submit
+        # would let a crash erase a failure.
+        console.print(f"  [red]✗ adapter error:[/red] {exc} - submitting the sandbox as it stands")
+    try:
+        status = client.sandbox_status(session_id, secret).get("status")
+        if status == "active":
+            client.sandbox_submit(session_id, secret)
+            console.print("  [green]✓ submitted[/green] - the arena now runs the task's tests")
+        else:
+            console.print(f"  session is already {status}")
+    except ArenaError as exc:
+        console.print(f"  [red]submit failed:[/red] {exc}")
+
+
+sandbox_app = typer.Typer(
+    help="Work a sandbox task from inside your agent. Reads the TESSERAX_* "
+    "variables `tesserax run` sets for sandbox work.",
+    no_args_is_help=True,
+)
+app.add_typer(sandbox_app, name="sandbox")
+
+
+def _sandbox_session() -> tuple[ArenaClient, int, str]:
+    session_id = os.environ.get("TESSERAX_SESSION_ID")
+    secret = os.environ.get("TESSERAX_AGENT_SECRET")
+    if not session_id or not secret:
+        _err("TESSERAX_SESSION_ID / TESSERAX_AGENT_SECRET are not set - run this from an "
+             "adapter started by `tesserax run`")
+    base = os.environ.get("TESSERAX_BASE_URL") or get_base_url()
+    return ArenaClient(base), int(session_id), secret
+
+
+@sandbox_app.command("exec")
+def sandbox_exec(
+    command: str = typer.Argument(..., help="Shell command to run in the sandbox (cwd /workspace)."),
+    timeout: int = typer.Option(120, "--timeout", help="Seconds, 1-300."),
+):
+    """Run a command in the sandbox. Prints its stdout/stderr and exits with its code."""
+    client, session_id, secret = _sandbox_session()
+    try:
+        result = client.sandbox_exec(session_id, secret, command, timeout)
+    except ArenaError as exc:
+        _err(str(exc))
+    finally:
+        client.close()
+    sys.stdout.write(result.get("stdout", ""))
+    sys.stderr.write(result.get("stderr", ""))
+    raise typer.Exit(int(result.get("exit_code", 1)))
+
+
+@sandbox_app.command("read")
+def sandbox_read(path: str = typer.Argument(..., help="Path relative to /workspace.")):
+    """Print a file from the sandbox."""
+    client, session_id, secret = _sandbox_session()
+    try:
+        sys.stdout.write(client.sandbox_read(session_id, secret, path))
+    except ArenaError as exc:
+        _err(str(exc))
+    finally:
+        client.close()
+
+
+@sandbox_app.command("write")
+def sandbox_write(
+    path: str = typer.Argument(..., help="Path relative to /workspace."),
+    source: Optional[str] = typer.Option(None, "--from", help="Local file to upload (default: stdin)."),
+):
+    """Write a file into the sandbox, from a local file or stdin."""
+    content = open(source).read() if source else sys.stdin.read()
+    client, session_id, secret = _sandbox_session()
+    try:
+        client.sandbox_write(session_id, secret, path, content)
+    except ArenaError as exc:
+        _err(str(exc))
+    finally:
+        client.close()
