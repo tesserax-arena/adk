@@ -7,9 +7,11 @@ import httpx
 
 MIN_POLL_WAIT = 2
 
-# Public marketing domain may sit behind Cloudflare Bot Fight Mode, which
-# challenges non-browser clients. The Fly origin serves the same app without
-# that edge layer and is a safe temporary API host.
+# The public domain sits behind Cloudflare, which can fail a non-browser client
+# in two ways: a bot challenge (Bot Fight Mode), or an edge error when it cannot
+# reach the origin (520-530, e.g. 525 when the origin certificate lapses). The
+# Fly origin serves the same app without that edge layer and is a safe
+# temporary API host.
 DEFAULT_PUBLIC_BASE = "https://tesserax.net"
 FALLBACK_ORIGIN = "https://tesserax-arena.fly.dev"
 
@@ -27,13 +29,14 @@ class ArenaClient:
         *,
         auto_fallback: bool = True,
         on_fallback=None,
+        transport: httpx.BaseTransport | None = None,
     ):
         self.base_url = base_url.rstrip("/")
         self.api_key = api_key
         self.timeout = timeout
         self.auto_fallback = auto_fallback
         self._on_fallback = on_fallback
-        self._http = httpx.Client(timeout=timeout)
+        self._http = httpx.Client(timeout=timeout, transport=transport)
         self.used_fallback = False
 
     def close(self) -> None:
@@ -47,11 +50,16 @@ class ArenaClient:
             headers.update(extra)
         return headers
 
-    def _maybe_switch_to_fallback(self, resp: httpx.Response) -> bool:
-        """If CF blocked the public domain, switch base_url to the Fly origin."""
+    def _maybe_switch_to_fallback(self, resp: httpx.Response | None) -> bool:
+        """If the public domain is unusable, switch base_url to the Fly origin.
+
+        ``resp`` is None when the connection itself failed (DNS, TCP, TLS).
+        """
         if not self.auto_fallback:
             return False
-        if not _looks_like_cloudflare_challenge(resp):
+        if resp is not None and not (
+            _looks_like_cloudflare_challenge(resp) or _looks_like_edge_failure(resp)
+        ):
             return False
         if self.base_url.rstrip("/") == FALLBACK_ORIGIN.rstrip("/"):
             return False
@@ -67,9 +75,20 @@ class ArenaClient:
         return True
 
     def _request(self, method: str, path: str, **kwargs) -> httpx.Response:
-        """HTTP request with one automatic retry on Cloudflare challenge."""
+        """HTTP request with one automatic retry against the Fly origin when the
+        public domain challenges, fails at the edge, or cannot be connected to.
+
+        Only a failed *connection* is retried, never a read timeout: a request
+        that reached the server may have been processed (a POST /api/register
+        retried after a timeout could create a second account).
+        """
         url = f"{self.base_url}{path}"
-        resp = self._http.request(method, url, **kwargs)
+        try:
+            resp = self._http.request(method, url, **kwargs)
+        except httpx.ConnectError:
+            if not self._maybe_switch_to_fallback(None):
+                raise
+            return self._http.request(method, f"{self.base_url}{path}", **kwargs)
         if self._maybe_switch_to_fallback(resp):
             url = f"{self.base_url}{path}"
             resp = self._http.request(method, url, **kwargs)
@@ -163,6 +182,13 @@ def _looks_like_cloudflare_challenge(resp: httpx.Response) -> bool:
         or "cf-browser-verification" in body
         or "challenge-platform" in body
     )
+
+
+def _looks_like_edge_failure(resp: httpx.Response) -> bool:
+    """True for Cloudflare's own origin-failure responses (520-530): the edge
+    answered, but could not reach or handshake with the origin, so the request
+    never got there and is safe to send to the origin directly."""
+    return 520 <= resp.status_code <= 530 and resp.headers.get("server", "").lower() == "cloudflare"
 
 
 def _json_or_raise(resp: httpx.Response) -> dict:
